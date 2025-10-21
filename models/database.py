@@ -1,7 +1,7 @@
 import psycopg
 
-class DatabaseModel:
-    def __init__(self, connection_string):
+class Database:
+    def __init__(self, connection_string: str):
         # Initialize the database connection parameters
         self.connection_string = connection_string
         self.conn = None
@@ -11,16 +11,16 @@ class DatabaseModel:
         if self.conn is None or self.conn.closed:
             try:
                 self.conn = psycopg.connect(self.connection_string)
-                print("Conexão estabelecida com sucesso!")
+                return {"message": "the connection was established successfully!"}
             except Exception as e:
-                print(f"Erro ao conectar ao banco: {e}")
+                return {"error": f"Error connecting to the database: {e}"}
         return self.conn
 
     def close(self):
         # Closes the database connection if it exists
         if self.conn and not self.conn.closed:
             self.conn.close()
-            print("Conexão fechada com sucesso.")
+            return {"message": "the connection was closed successfully."}
 
     def execute_query(self, query, params=None):
         # Executes a given SQL query with optional parameters
@@ -33,7 +33,7 @@ class DatabaseModel:
                     return result
                 conn.commit()
         except Exception as e:
-            print(f"Erro ao executar query: {e}")
             conn.rollback()
+            return {"error": f"Error executing query: {e}"}
         finally:
             self.close()
