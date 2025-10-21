@@ -15,6 +15,15 @@ class Database:
             except Exception as e:
                 return {"error": f"Error connecting to the database: {e}"}
         return self.conn
+    
+    def status(self):
+        # Returns the status of the database connection
+        if self.conn is None:
+            return {"status": "No connection established."}
+        elif self.conn.closed:
+            return {"status": "Connection is closed."}
+        else:
+            return {"status": "Connection is open."}
 
     def close(self):
         # Closes the database connection if it exists
@@ -22,18 +31,21 @@ class Database:
             self.conn.close()
             return {"message": "the connection was closed successfully."}
 
-    def execute_query(self, query, params=None):
-        # Executes a given SQL query with optional parameters
-        conn = self.connect()
+    def execute(self, query, params=None, fetch=False):
+        conn = self.conn if self.conn and not getattr(self.conn, "closed", True) else self.connect()
+        if isinstance(conn, dict) and "error" in conn:
+            return conn
+
         try:
             with conn.cursor() as cur:
                 cur.execute(query, params)
-                if cur.description: # Check if the query returns data
-                    result = cur.fetchall()
-                    return result
+                if fetch and cur.description:
+                    return cur.fetchall()
                 conn.commit()
+                return {"rowcount": cur.rowcount}
         except Exception as e:
-            conn.rollback()
+            try:
+                conn.rollback()
+            except Exception:
+                pass
             return {"error": f"Error executing query: {e}"}
-        finally:
-            self.close()
