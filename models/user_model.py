@@ -10,6 +10,6 @@ class User:
         self.campus = campus # Campus
         self.created_at = created_at # Created At
 
-    def password_to_hash(self, password):
-        # Implement password hashing logic here
-        pass
+def password_to_hash(password):
+    import hashlib
+    return hashlib.sha256(password.encode()).hexdigest()

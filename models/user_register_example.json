@@ -1,0 +1,13 @@
+{
+    "username": "teste",
+    "email": "teste@example.com",
+    "phone" : "49988160512",
+    "password": "senha123",
+    "account_type": {
+        "admin": false,
+        "citizen": true,
+        "student": false
+    },
+    "city": "Concórdia",
+    "campus": ""
+}

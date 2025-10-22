@@ -8,10 +8,11 @@ class Database:
 
     def connect(self):
         # Creates a new database connection if none exists
-        if self.conn is None or self.conn.closed:
+        if self.conn is None or getattr(self.conn, "closed", True):
             try:
                 self.conn = psycopg.connect(self.connection_string)
-                return {"message": "the connection was established successfully!"}
+                # return the actual connection on success (not a dict)
+                return self.conn
             except Exception as e:
                 return {"error": f"Error connecting to the database: {e}"}
         return self.conn
@@ -20,18 +21,18 @@ class Database:
         # Returns the status of the database connection
         if self.conn is None:
             return {"status": "No connection established."}
-        elif self.conn.closed:
+        elif getattr(self.conn, "closed", True):
             return {"status": "Connection is closed."}
         else:
             return {"status": "Connection is open."}
 
     def close(self):
         # Closes the database connection if it exists
-        if self.conn and not self.conn.closed:
+        if self.conn and not getattr(self.conn, "closed", True):
             self.conn.close()
             return {"message": "the connection was closed successfully."}
 
-    def execute(self, query, params=None, fetch=False):
+    def execute(self, query, params=None):
         conn = self.conn if self.conn and not getattr(self.conn, "closed", True) else self.connect()
         if isinstance(conn, dict) and "error" in conn:
             return conn
@@ -39,10 +40,17 @@ class Database:
         try:
             with conn.cursor() as cur:
                 cur.execute(query, params)
-                if fetch and cur.description:
-                    return cur.fetchall()
+
+                if cur.description:
+                    # fetch returned rows (e.g. INSERT ... RETURNING)
+                    result = cur.fetchall()
+                    # commit so the INSERT/UPDATE is persisted
+                    conn.commit()
+                    return result
+
                 conn.commit()
-                return {"rowcount": cur.rowcount}
+                return {"message": "Query executed successfully."}
+
         except Exception as e:
             try:
                 conn.rollback()

@@ -1,24 +1,21 @@
 from flask import Flask
-from models.database import Database
-from config import Config
+from controllers.db_instance import db
+from controllers.user_register_controller import UserRegisterController
 
 app = Flask(__name__)
 
-db = Database(Config.DATABASE_URL)
-db.connect()
-
-@app.route("/connect")
-def connect_database():
-    return db.connect()
-
-@app.route("/database")
+@app.route("/status")
 def check_database_status():
     return db.status()
 
-@app.route("/close")
-def close_database():
-    db.close()
-    return db.status()
+@app.route("/register", methods=["POST"])
+def register_user():
+    controller = UserRegisterController()
+    return controller.register()
 
+@app.route("/users", methods=["GET"])
+def list_users():
+    return db.execute("select * from users")
+    
 if __name__ == "__main__":
     app.run(debug=True)
