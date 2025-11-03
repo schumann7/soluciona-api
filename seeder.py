@@ -4,13 +4,15 @@ def create_tables():
     db.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
-        username VARCHAR(100) NOT NULL,
+        username VARCHAR(100) UNIQUE NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         phone VARCHAR(20),
         password VARCHAR(255) NOT NULL,
+        profile_picture INT REFERENCES images(id) ON DELETE SET NULL,
         account_type JSONB NOT NULL,
         city VARCHAR(100),
         campus VARCHAR(100),
+        birthdate DATE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 """)
@@ -22,7 +24,19 @@ def create_tables():
             longitude DOUBLE PRECISION NOT NULL,
             description TEXT,
             place VARCHAR(255),
+            address VARCHAR(255),
+            status VARCHAR(8) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
             registered_by INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            registered_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    """)
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS images (
+            id SERIAL PRIMARY KEY,
+            url_storage VARCHAR(1024) NOT NULL,
+            problema_id INTEGER REFERENCES reports(id) ON DELETE CASCADE,
+            image_type VARCHAR(50),
+            image_size BIGINT,
             registered_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)

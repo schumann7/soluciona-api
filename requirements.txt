@@ -2,3 +2,4 @@ Flask
 psycopg
 dotenv
 psycopg[binary]
+flask-jwt-extended
