@@ -3,3 +3,4 @@ psycopg
 dotenv
 psycopg[binary]
 flask-jwt-extended
+boto3

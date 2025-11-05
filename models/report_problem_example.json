@@ -3,6 +3,7 @@
     "latitude":-23.55052,
     "longitude":-46.633308,
     "description":"Há um buraco grande na rua que está causando transtornos.",
-    "place":"Concórdia",
+    "place_id":"1",
+    "address":"Rua A, 123",
     "registered_by":"1"
 }

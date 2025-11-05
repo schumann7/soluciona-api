@@ -15,16 +15,9 @@ class UserRegisterController:
         password = data["password"]
         username = data.get("username")
         phone = data.get("phone")
-        account_type = data.get("account_type", "")
         birthdate = data.get("birthdate")
-        # if account_type is a dict/list convert to JSON string for DB insertion
-        if isinstance(account_type, (dict, list)):
-            account_type = json.dumps(account_type)
-        elif account_type is None:
-            account_type = ""
-
-        city = data.get("city", "")
-        campus = data.get("campus", "")
+        place_id = data.get("place_id")
+        profile_picture = data.get("profile_picture")
 
         try:
             existing = db.execute("SELECT id FROM users WHERE email = %s", (email,))
@@ -41,8 +34,8 @@ class UserRegisterController:
         birthdate = convert_date(birthdate)
         try:
             result = db.execute(
-                "INSERT INTO users (email, password, username, phone, account_type, city, campus, birthdate, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW()) RETURNING id",
-                (email, hashed, username, phone, account_type, city, campus, birthdate),
+                "INSERT INTO users (email, password, username, phone, place_id, birthdate, profile_picture) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
+                (email, hashed, username, phone, place_id, birthdate, profile_picture),
             )
         except Exception as e:
             return jsonify({"error": "Erro ao criar usuário.", "detail": str(e)}), 500
@@ -55,5 +48,5 @@ class UserRegisterController:
         except Exception:
             new_id = None
 
-        user_info = {"id": new_id, "email": email, "phone": phone, "account_type": account_type, "city": city, "campus": campus}
+        user_info = {"id": new_id, "email": email, "phone": phone}
         return jsonify({"message": "Usuário registrado com sucesso.", "user": user_info}), 201

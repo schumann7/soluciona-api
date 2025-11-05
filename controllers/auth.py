@@ -6,33 +6,41 @@ from models.user_model import password_to_hash
 class AuthController:
     def login(self):
         data = request.get_json(silent=True) or {}
-        identifier = data.get("identifier") or data.get("username") or data.get("email") or data.get("phone")
+        identifier = (
+            data.get("identifier")
+            or data.get("username")
+            or data.get("email")
+            or data.get("phone")
+        )
         password = data.get("password")
 
         if not identifier or not password:
-            return jsonify({"error": "Identifier (username/email/phone) and password are required."}), 400
+            return jsonify({
+                "error": "Identifier (username/email/phone) and password are required."
+            }), 400
 
         try:
-            # match username OR email (case-insensitive) OR phone
             user = db.execute(
                 "SELECT id, username, password FROM users "
                 "WHERE username = %s OR LOWER(email) = LOWER(%s) OR phone = %s LIMIT 1",
                 (identifier, identifier, identifier)
             )
         except Exception as e:
-            return jsonify({"error": "Error accessing the database.", "detail": str(e)}), 500
-
-        if isinstance(user, dict) and user.get("error"):
-            return jsonify({"error": "Error accessing the database.", "detail": user["error"]}), 500
+            return jsonify({
+                "error": "Error accessing the database.",
+                "detail": str(e)
+            }), 500
 
         if not user or len(user) == 0:
             return jsonify({"error": "Invalid credentials."}), 401
 
         user_id, db_username, db_password = user[0]
 
-        # compare hashed passwords
+        # Valida senha
         if password_to_hash(password) != db_password:
             return jsonify({"error": "Invalid credentials."}), 401
 
-        access_token = create_access_token(identity={"id": user_id, "username": db_username})
+        # ✅ Cria o token apenas com o user_id convertido para string
+        access_token = create_access_token(identity=str(user_id))
+
         return jsonify({"access_token": access_token}), 200
