@@ -14,12 +14,3 @@ class User:
 def password_to_hash(password):
     import hashlib
     return hashlib.sha256(password.encode()).hexdigest()
-
-def convert_date(data_str: str) -> str:
-    from datetime import datetime
-    # Convert date from 'dd/mm/yyyy' to 'yyyy-mm-dd'
-    try:
-        data_formatada = datetime.strptime(data_str, "%d/%m/%Y").date()
-        return data_formatada.isoformat()  # return 'YYYY-MM-DD'
-    except ValueError:
-        raise ValueError(f"Data inválida: '{data_str}'. Use o formato dd/mm/aaaa.")

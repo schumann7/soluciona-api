@@ -1,6 +1,6 @@
 from controllers.db_instance import db
 from flask import request, jsonify
-from models.user_model import password_to_hash, convert_date
+from models.user_model import password_to_hash
 import json
 
 class UserRegisterController:
@@ -15,7 +15,6 @@ class UserRegisterController:
         password = data["password"]
         username = data.get("username")
         phone = data.get("phone")
-        birthdate = data.get("birthdate")
         place_id = data.get("place_id")
         profile_picture = data.get("profile_picture")
 
@@ -31,11 +30,10 @@ class UserRegisterController:
             return jsonify({"error": "E-mail já cadastrado."}), 409
 
         hashed = password_to_hash(password)
-        birthdate = convert_date(birthdate)
         try:
             result = db.execute(
-                "INSERT INTO users (email, password, username, phone, place_id, birthdate, profile_picture) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
-                (email, hashed, username, phone, place_id, birthdate, profile_picture),
+                "INSERT INTO users (email, password, username, phone, place_id, profile_picture) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
+                (email, hashed, username, phone, place_id, profile_picture),
             )
         except Exception as e:
             return jsonify({"error": "Erro ao criar usuário.", "detail": str(e)}), 500

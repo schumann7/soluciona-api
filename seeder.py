@@ -10,7 +10,7 @@ DDL_STATEMENTS = [
     );
     """,
 
-    # users: place_id column will be added/kept; account_type removed
+    # users: place_id column will be added/kept; account_type and birthdate removed
     """
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -20,7 +20,6 @@ DDL_STATEMENTS = [
         password VARCHAR(255) NOT NULL,
         profile_picture INT,
         place_id INTEGER,
-        birthdate DATE,
         account_status VARCHAR(8) NOT NULL DEFAULT 'active' CHECK (account_status IN ('active', 'inactive')),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -69,42 +68,6 @@ DDL_STATEMENTS = [
         FOREIGN KEY (profile_picture)
         REFERENCES images(id)
         ON DELETE SET NULL;
-      END IF;
-    END$$;
-    """,
-
-    # remove old constraints that referenced places(name) (if present)
-    "ALTER TABLE users DROP CONSTRAINT IF EXISTS fk_users_city;",
-    "ALTER TABLE users DROP CONSTRAINT IF EXISTS fk_users_campus;",
-    "ALTER TABLE reports DROP CONSTRAINT IF EXISTS fk_reports_place;",
-
-    # drop old columns city/campus/place/account_type (if they exist)
-    """
-    DO $$
-    BEGIN
-      IF EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_name='users' AND column_name='city'
-      ) THEN
-        ALTER TABLE users DROP COLUMN city;
-      END IF;
-      IF EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_name='users' AND column_name='campus'
-      ) THEN
-        ALTER TABLE users DROP COLUMN campus;
-      END IF;
-      IF EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_name='reports' AND column_name='place'
-      ) THEN
-        ALTER TABLE reports DROP COLUMN place;
-      END IF;
-      IF EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_name='users' AND column_name='account_type'
-      ) THEN
-        ALTER TABLE users DROP COLUMN account_type;
       END IF;
     END$$;
     """,
