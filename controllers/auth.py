@@ -43,4 +43,4 @@ class AuthController:
         # ✅ Cria o token apenas com o user_id convertido para string
         access_token = create_access_token(identity=str(user_id))
 
-        return jsonify({"access_token": access_token}), 200
+        return jsonify({"access_token": access_token, "username": db_username}), 200

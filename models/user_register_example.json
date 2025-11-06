@@ -1,9 +1,7 @@
 {
     "username": "teste",
     "email": "teste@example.com",
-    "phone" : "49988160512",
-    "password": "senha123",
-    "place_id": 1,
-    "birthdate": "03/06/2007",
-    "account_status": "active"
+    "phone" : "",
+    "password": "teste123",
+    "place_id": 1
 }

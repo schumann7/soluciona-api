@@ -33,7 +33,7 @@ DDL_STATEMENTS = [
         latitude DOUBLE PRECISION NOT NULL,
         longitude DOUBLE PRECISION NOT NULL,
         description TEXT,
-        place_id INTEGER,
+        place_id INTEGER NOT NULL,
         address VARCHAR(255),
         status VARCHAR(8) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
         registered_by INTEGER REFERENCES users(id) ON DELETE CASCADE,
