@@ -1,5 +1,6 @@
 from flask import Flask
 from config import Config
+from controllers.db_instance import db
 from controllers.user_register_controller import UserRegisterController
 from controllers.auth import AuthController
 from controllers.reports_controller import ReportsController
@@ -82,5 +83,9 @@ def add_place():
     controller = PlacesController()
     return controller.add_place()
 
+@app.route("/", methods=["GET"])
+def home():
+    return {"message": "Tá rodando", "database": db.status}
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(host="0.0.0.0", port=5000)

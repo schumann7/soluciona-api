@@ -1,7 +1,6 @@
 from controllers.db_instance import db
 from flask import request, jsonify
 from models.user_model import password_to_hash
-import json
 from flask_jwt_extended import get_jwt_identity
 
 class UserRegisterController:
