@@ -21,7 +21,7 @@ class AuthController:
 
         try:
             user = db.execute(
-                "SELECT id, username, password FROM users "
+                "SELECT id, username, password, place_id FROM users "
                 "WHERE username = %s OR LOWER(email) = LOWER(%s) OR phone = %s LIMIT 1",
                 (identifier, identifier, identifier)
             )
@@ -34,7 +34,7 @@ class AuthController:
         if not user or len(user) == 0:
             return jsonify({"error": "Invalid credentials."}), 401
 
-        user_id, db_username, db_password = user[0]
+        user_id, db_username, db_password, place_id = user[0]
 
         # Valida senha
         if password_to_hash(password) != db_password:
@@ -43,4 +43,8 @@ class AuthController:
         # ✅ Cria o token apenas com o user_id convertido para string
         access_token = create_access_token(identity=str(user_id))
 
-        return jsonify({"access_token": access_token, "username": db_username}), 200
+        return jsonify({
+            "access_token": access_token,
+            "username": db_username,
+            "place_id": place_id
+        }), 200
