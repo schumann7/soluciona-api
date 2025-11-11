@@ -36,13 +36,14 @@ class AuthController:
 
         user_id, db_username, db_password, place_id = user[0]
 
-        # Valida senha
+        # Verify password
         if password_to_hash(password) != db_password:
             return jsonify({"error": "Invalid credentials."}), 401
 
-        # ✅ Cria o token apenas com o user_id convertido para string
+        # Create jwt token for user
         access_token = create_access_token(identity=str(user_id))
 
+        # Return the access token and user information
         return jsonify({
             "access_token": access_token,
             "username": db_username,

@@ -1,6 +1,5 @@
 from flask import Flask
 from config import Config
-from controllers.db_instance import db
 from controllers.user_register_controller import UserRegisterController
 from controllers.auth import AuthController
 from controllers.reports_controller import ReportsController
@@ -76,16 +75,6 @@ def upload_image():
 def get_user():
     controller = UserRegisterController()
     return controller.get_user_profile()
-
-# Somente para testes
-@app.route("/places", methods=["POST"])
-def add_place():
-    controller = PlacesController()
-    return controller.add_place()
-
-@app.route("/", methods=["GET"])
-def home():
-    return {"message": "Tá rodando", "database": db.status}
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

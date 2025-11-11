@@ -11,7 +11,7 @@ class Database:
         if self.conn is None or getattr(self.conn, "closed", True):
             try:
                 self.conn = psycopg.connect(self.connection_string)
-                # return the actual connection on success (not a dict)
+                # return the actual connection on success
                 return self.conn
             except Exception as e:
                 return {"error": f"Error connecting to the database: {e}"}
@@ -42,7 +42,7 @@ class Database:
                 cur.execute(query, params)
 
                 if cur.description:
-                    # fetch returned rows (e.g. INSERT ... RETURNING)
+                    # fetch returned rows
                     result = cur.fetchall()
                     # commit so the INSERT/UPDATE is persisted
                     conn.commit()

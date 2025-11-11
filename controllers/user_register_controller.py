@@ -27,7 +27,7 @@ class UserRegisterController:
             return jsonify({"error": "Error at accessing database.", "detail": existing["error"]}), 500
 
         if existing and len(existing) > 0:
-            return jsonify({"error": "E-mail já cadastrado."}), 409
+            return jsonify({"error": "E-mail already exists."}), 409
 
         hashed = password_to_hash(password)
         try:
@@ -36,10 +36,10 @@ class UserRegisterController:
                 (email, hashed, username, phone, place_id, profile_picture),
             )
         except Exception as e:
-            return jsonify({"error": "Erro ao criar usuário.", "detail": str(e)}), 500
+            return jsonify({"error": "Error creating user.", "detail": str(e)}), 500
 
         if isinstance(result, dict) and result.get("error"):
-            return jsonify({"error": "Erro ao criar usuário.", "detail": result["error"]}), 500
+            return jsonify({"error": "Error creating user.", "detail": result["error"]}), 500
 
         try:
             new_id = result[0][0] if result and len(result) > 0 else None
@@ -47,7 +47,7 @@ class UserRegisterController:
             new_id = None
 
         user_info = {"id": new_id, "email": email, "phone": phone}
-        return jsonify({"message": "Usuário registrado com sucesso.", "user": user_info}), 201
+        return jsonify({"message": "User registered successfully.", "user": user_info}), 201
 
     def get_user_profile(self):
         try:
@@ -60,7 +60,7 @@ class UserRegisterController:
             user_id = None
 
         if not user_id:
-            return jsonify({"error": "Usuário não autenticado."}), 401
+            return jsonify({"error": "User not authenticated."}), 401
 
         try:
             user_row = db.execute(
@@ -69,13 +69,13 @@ class UserRegisterController:
                 (user_id,)
             )
         except Exception as e:
-            return jsonify({"error": "Erro ao consultar usuário.", "detail": str(e)}), 500
+            return jsonify({"error": "Error fetching user.", "detail": str(e)}), 500
 
         if isinstance(user_row, dict) and user_row.get("error"):
-            return jsonify({"error": "Erro ao consultar usuário.", "detail": user_row["error"]}), 500
+            return jsonify({"error": "Error fetching user.", "detail": user_row["error"]}), 500
 
         if not user_row or len(user_row) == 0:
-            return jsonify({"error": "Usuário não encontrado."}), 404
+            return jsonify({"error": "User not found."}), 404
 
         u = user_row[0]
         profile_picture_id = u[4]
@@ -101,7 +101,7 @@ class UserRegisterController:
             "username": u[1],
             "email": u[2],
             "phone": u[3],
-            "profile_picture": image_url,  # string url ou "" se não houver
+            "profile_picture": image_url,  # string url or "" if not available
             "place_id": u[5],
             "account_status": u[6],
             "created_at": u[7]

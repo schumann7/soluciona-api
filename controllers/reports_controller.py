@@ -34,10 +34,10 @@ class ReportsController:
                 (name, latitude, longitude, description, place_id, address, registered_by),
             )
         except Exception as e:
-            return jsonify({"error": "Erro ao registrar o problema.", "detail": str(e)}), 500
+            return jsonify({"error": "Error registering report.", "detail": str(e)}), 500
 
         if isinstance(result, dict) and result.get("error"):
-            return jsonify({"error": "Erro ao registrar o problema.", "detail": result["error"]}), 500
+            return jsonify({"error": "Error registering report.", "detail": result["error"]}), 500
 
         try:
             new_id = result[0][0] if result and len(result) > 0 else None
@@ -46,7 +46,7 @@ class ReportsController:
 
         report_info = {"id": new_id, "name": name, "latitude": latitude, "longitude": longitude,
                        "description": description, "place_id": place_id, "registered_by": registered_by}
-        return jsonify({"message": "Problema registrado com sucesso.", "report": report_info}), 201
+        return jsonify({"message": "Report registered successfully.", "report": report_info}), 201
 
     def list_reports_by_user_place(self):
         try:
@@ -59,29 +59,28 @@ class ReportsController:
             user_id = None
 
         if not user_id:
-            return jsonify({"error": "Usuário não autenticado."}), 401
+            return jsonify({"error": "User not authenticated."}), 401
 
         try:
             user_row = db.execute("SELECT place_id FROM users WHERE id = %s", (user_id,))
         except Exception as e:
-            return jsonify({"error": "Erro ao consultar o usuário.", "detail": str(e)}), 500
+            return jsonify({"error": "Error fetching user.", "detail": str(e)}), 500
 
         if not user_row:
-            return jsonify({"error": "Usuário não encontrado."}), 404
+            return jsonify({"error": "User not found."}), 404
 
         place_id = user_row[0][0]
         if not place_id:
-            return jsonify({"error": "Usuário sem local (place) associado."}), 404
+            return jsonify({"error": "User has no associated place."}), 404
 
-        # obter nome do place (opcional, para incluir na resposta)
         try:
             place_row = db.execute("SELECT id, name FROM places WHERE id = %s", (place_id,))
         except Exception as e:
-            return jsonify({"error": "Erro ao consultar o local do usuário.", "detail": str(e)}), 500
+            return jsonify({"error": "Error fetching user's place.", "detail": str(e)}), 500
 
         place_name = place_row[0][1] if place_row and len(place_row) > 0 else None
 
-        # buscar reports vinculados ao place_id com status = active
+        # search reports linked to place_id with status = active
         try:
             reports = db.execute(
                 "SELECT id, latitude, longitude "
@@ -89,10 +88,10 @@ class ReportsController:
                 (place_id, "active")
             )
         except Exception as e:
-            return jsonify({"error": "Erro ao listar os relatórios.", "detail": str(e)}), 500
+            return jsonify({"error": "Error listing reports.", "detail": str(e)}), 500
 
         if isinstance(reports, dict) and reports.get("error"):
-            return jsonify({"error": "Erro ao listar os relatórios.", "detail": reports["error"]}), 500
+            return jsonify({"error": "Error listing reports.", "detail": reports["error"]}), 500
 
         reports_list = []
         for report in reports:
@@ -109,7 +108,7 @@ class ReportsController:
         }), 200
 
     def get_report_full_details(self, report_id):
-        # busca dados do report
+        # search report by id
         try:
             report = db.execute(
                 "SELECT id, name, latitude, longitude, description, place_id, address, status, registered_by, registered_date "
@@ -117,13 +116,13 @@ class ReportsController:
                 (report_id,)
             )
         except Exception as e:
-            return jsonify({"error": "Erro ao consultar o relatório.", "detail": str(e)}), 500
+            return jsonify({"error": "Error fetching report.", "detail": str(e)}), 500
 
         if isinstance(report, dict) and report.get("error"):
-            return jsonify({"error": "Erro ao consultar o relatório.", "detail": report["error"]}), 500
+            return jsonify({"error": "Error fetching report.", "detail": report["error"]}), 500
 
         if not report or len(report) == 0:
-            return jsonify({"error": "Relatório não encontrado."}), 404
+            return jsonify({"error": "Report not found."}), 404
 
         r = report[0]
         report_dict = {
@@ -139,7 +138,7 @@ class ReportsController:
             "registered_date": r[9]
         }
 
-        # busca apenas as URLs das imagens relacionadas
+        # search associated images
         try:
             images = db.execute(
                 "SELECT url_storage FROM images WHERE report_id = %s ORDER BY id",
@@ -148,13 +147,13 @@ class ReportsController:
             if not images:
                 images = []
         except Exception:
-            # em caso de erro real no DB, não falhar por ausência de imagens — retornar lista vazia
+            # in case of error, just return empty images list
             images = []
 
         images_list = []
         if images and not (isinstance(images, dict) and images.get("error")):
             for img in images:
-                # img pode ser tupla/linha; a primeira coluna é a url_storage
+                # img can be a tuple/row; the first column is the url_storage
                 url = img[0] if img and len(img) > 0 else None
                 if url:
                     images_list.append(url)
@@ -173,15 +172,15 @@ class ReportsController:
             user_id = None
 
         if not user_id:
-            return jsonify({"error": "Usuário não autenticado."}), 401
+            return jsonify({"error": "User not authenticated."}), 401
 
         try:
             row = db.execute("SELECT registered_by FROM reports WHERE id = %s", (report_id,))
         except Exception as e:
-            return jsonify({"error": "Erro ao consultar o relatório.", "detail": str(e)}), 500
+            return jsonify({"error": "Error fetching report.", "detail": str(e)}), 500
 
         if not row or len(row) == 0:
-            return jsonify({"error": "Relatório não encontrado."}), 404
+            return jsonify({"error": "Report not found."}), 404
 
         report_owner = row[0][0]
         try:
@@ -190,7 +189,7 @@ class ReportsController:
             report_owner_int = None
 
         if report_owner_int != user_id:
-            return jsonify({"error": "Permissão negada. Apenas o criador pode remover o relatório."}), 403
+            return jsonify({"error": "Permission denied. Only the creator can remove the report."}), 403
 
         # delete report
         try:
@@ -199,15 +198,15 @@ class ReportsController:
                 (report_id,)
             )
         except Exception as e:
-            return jsonify({"error": "Erro ao remover o relatório.", "detail": str(e)}), 500
+            return jsonify({"error": "Error removing report.", "detail": str(e)}), 500
 
         if isinstance(result, dict) and result.get("error"):
-            return jsonify({"error": "Erro ao remover o relatório.", "detail": result["error"]}), 500
+            return jsonify({"error": "Error removing report.", "detail": result["error"]}), 500
 
         if not result:
-            return jsonify({"error": "Relatório não encontrado."}), 404
+            return jsonify({"error": "Report not found."}), 404
 
-        return jsonify({"message": "Relatório removido com sucesso.", "report_id": report_id}), 200
+        return jsonify({"message": "Report removed successfully.", "report_id": report_id}), 200
 
     def list_reports_by_user(self):
         try:
@@ -220,7 +219,7 @@ class ReportsController:
             user_id = None
 
         if not user_id:
-            return jsonify({"error": "Usuário não autenticado."}), 401
+            return jsonify({"error": "User not authenticated."}), 401
 
         try:
             reports = db.execute(
@@ -231,10 +230,10 @@ class ReportsController:
             if not reports:
                 reports = []
         except Exception as e:
-            return jsonify({"error": "Erro ao listar os relatórios do usuário.", "detail": str(e)}), 500
+            return jsonify({"error": "Error listing user reports.", "detail": str(e)}), 500
 
         if isinstance(reports, dict) and reports.get("error"):
-            return jsonify({"error": "Erro ao listar os relatórios do usuário.", "detail": reports["error"]}), 500
+            return jsonify({"error": "Error listing user reports.", "detail": reports["error"]}), 500
 
         reports_list = []
         for r in (reports or []):

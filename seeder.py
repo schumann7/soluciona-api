@@ -1,7 +1,7 @@
 from controllers.db_instance import db
 
 DDL_STATEMENTS = [
-    # places must exist first
+    # create places table first because users and reports reference it
     """
     CREATE TABLE IF NOT EXISTS places (
         id SERIAL PRIMARY KEY,
@@ -10,7 +10,7 @@ DDL_STATEMENTS = [
     );
     """,
 
-    # users: place_id column will be added/kept; account_type and birthdate removed
+    # users: create before reports and images because they reference users
     """
     CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
